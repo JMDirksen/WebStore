@@ -9,18 +9,25 @@ header("Content-Type: text/plain");
 
 // Usage
 if (empty($path)) {
-    echo '# WebStore #' . PHP_EOL . PHP_EOL;
-    echo 'REST API to store some data, like json, csv or txt.' . PHP_EOL;
-    echo 'https://github.com/JMDirksen/WebStore' . PHP_EOL . PHP_EOL . PHP_EOL;
-    echo '# Examples #' . PHP_EOL . PHP_EOL;
-    echo 'Store data example:' . PHP_EOL . PHP_EOL;
-    echo 'curl -X PUT -d "key,value" "https://webstore.example.com/mysecret?maxlines=2&headerlines=1"' . PHP_EOL;
-    echo 'curl -X PATCH -d "test,value1" "https://webstore.example.com/mysecret?maxlines=2&headerlines=1"' . PHP_EOL;
-    echo 'curl -X PATCH -d "test,value2" "https://webstore.example.com/mysecret?maxlines=2&headerlines=1"' . PHP_EOL;
-    echo 'curl -X PATCH -d "test,value3" "https://webstore.example.com/mysecret?maxlines=2&headerlines=1"' . PHP_EOL . PHP_EOL;
-    echo 'The commands above output an url with which you can retrieve the stored data.' . PHP_EOL . PHP_EOL . PHP_EOL;
-    echo 'Retrieve data example:' . PHP_EOL;
-    echo 'curl "https://webstore.example.com/... the return url ..."' . PHP_EOL;
+    $secret = "<mysecret>";
+    $key = hash('sha256', preg_replace('/[^A-Za-z0-9_\-]/', '-', $secret) . $host);
+    echo "# WebStore #" . PHP_EOL . PHP_EOL;
+    echo "REST API to store some data, like json, csv or txt." . PHP_EOL;
+    echo "https://github.com/JMDirksen/WebStore" . PHP_EOL . PHP_EOL . PHP_EOL;
+    echo "# Examples #" . PHP_EOL . PHP_EOL;
+    echo "Store data example (you should choose your own secret, replace \"$secret\"):" . PHP_EOL;
+    echo "These commands will put some headers in the file and add 3 lines, but limit the file size to 2 lines (excluding headers):" . PHP_EOL . PHP_EOL;
+    echo "curl -X PUT -d \"key,value\" \"$scheme://$host/$secret?maxlines=2&headerlines=1\"" . PHP_EOL;
+    echo "curl -X PATCH -d \"test,value1\" \"$scheme://$host/$secret?maxlines=2&headerlines=1\"" . PHP_EOL;
+    echo "curl -X PATCH -d \"test,value2\" \"$scheme://$host/$secret?maxlines=2&headerlines=1\"" . PHP_EOL;
+    echo "curl -X PATCH -d \"test,value3\" \"$scheme://$host/$secret?maxlines=2&headerlines=1\"" . PHP_EOL . PHP_EOL;
+    echo "The commands above output an url with which you can retrieve the stored data." . PHP_EOL . PHP_EOL . PHP_EOL;
+    echo "Retrieve data example:" . PHP_EOL;
+    echo "curl \"$scheme://$host/$key\"" . PHP_EOL . PHP_EOL;
+    echo "The output would look like this:" . PHP_EOL;
+    echo "key,value" . PHP_EOL;
+    echo "test,value2" . PHP_EOL;
+    echo "test,value3" . PHP_EOL;
     exit;
 }
 

@@ -28,12 +28,12 @@ if (empty($path)) {
     echo "key,value" . PHP_EOL;
     echo "test,value2" . PHP_EOL;
     echo "test,value3" . PHP_EOL;
-    exit;
 }
 
 // GET file
-if ($method === 'GET') {
+elseif ($method === 'GET') {
     if (file_exists("/store/$path.txt")) {
+        touch("/store/$path.txt");
         readfile("/store/$path.txt");
     } else {
         http_response_code(404);
@@ -72,4 +72,12 @@ elseif ($method === 'PATCH') {
 else {
     http_response_code(400);
     echo "Invalid request method (only GET, PUT and PATCH are allowed).";
+}
+
+// File cleanup
+$files = glob('/store/*.txt');
+foreach ($files as $file) {
+    if (filemtime($file) < time() - 2592000) { // 1 month
+        unlink($file);
+    }
 }

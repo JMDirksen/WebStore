@@ -1,0 +1,4 @@
+services:
+  webstore:
+    volumes:
+      - ./html:/var/www/html

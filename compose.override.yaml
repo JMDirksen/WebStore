@@ -1,4 +1,8 @@
 services:
   webstore:
-    volumes:
-      - ./html:/var/www/html
+    networks:
+      - npm
+
+networks:
+  npm:
+    external: true

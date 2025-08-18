@@ -54,7 +54,7 @@ elseif ($method === 'PUT') {
         exit;
     }
     file_put_contents($file, $data . PHP_EOL);
-    echo $scheme . "://" . $host . "/$key" . PHP_EOL;
+    echo $scheme . "://" . $host . "/$key";
 }
 
 // PATCH append to existing file
@@ -82,7 +82,7 @@ elseif ($method === 'PATCH') {
             )));
         }
     }
-    echo $scheme . "://" . $host . "/$key" . PHP_EOL;
+    echo $scheme . "://" . $host . "/$key";
 }
 
 // Invalid request method

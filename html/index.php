@@ -5,6 +5,7 @@ $scheme = $_SERVER["HTTP_X_FORWARDED_SCHEME"] ?? $_SERVER["REQUEST_SCHEME"];
 $host = $_SERVER["HTTP_HOST"];
 $path = preg_replace('/[^A-Za-z0-9_\-]/', '-', $_GET['path'] ?? '');
 $key = hash('sha256', $path . $host);
+$maxfilesize = 102400; // 100 KB
 header("Content-Type: text/plain");
 
 // Usage
@@ -32,26 +33,42 @@ if (empty($path)) {
 
 // GET file
 elseif ($method === 'GET') {
-    if (file_exists("/store/$path.txt")) {
-        touch("/store/$path.txt");
-        readfile("/store/$path.txt");
+    $file = "/store/$path.txt";
+    if (file_exists($file)) {
+        touch($file);
+        readfile($file);
     } else {
         http_response_code(404);
-        echo "File not found.";
+        echo "File not found." . PHP_EOL;
     }
 }
 
 // PUT new file
 elseif ($method === 'PUT') {
+    $file = "/store/$key.txt";
     $data = file_get_contents('php://input');
-    file_put_contents("/store/$key.txt", $data . PHP_EOL);
-    echo $scheme . "://" . $host . "/$key";
+    $size = strlen($data);
+    if ($size > $maxfilesize) {
+        http_response_code(413);
+        echo "Content size exceeds limit.". PHP_EOL;
+        exit;
+    }
+    file_put_contents($file, $data . PHP_EOL);
+    echo $scheme . "://" . $host . "/$key" . PHP_EOL;
 }
 
 // PATCH append to existing file
 elseif ($method === 'PATCH') {
+    $file = "/store/$key.txt";
     $data = file_get_contents('php://input');
-    file_put_contents("/store/$key.txt", $data . PHP_EOL, FILE_APPEND);
+    $size = strlen($data);
+    $size += file_exists($file) ? filesize($file) : 0;
+    if ($size > $maxfilesize) {
+        http_response_code(413);
+        echo "Content size exceeds limit.". PHP_EOL;
+        exit;
+    }
+    file_put_contents($file, $data . PHP_EOL, FILE_APPEND);
 
     // Max lines
     if (isset($_GET['maxlines'])) {
@@ -65,13 +82,13 @@ elseif ($method === 'PATCH') {
             )));
         }
     }
-    echo $scheme . "://" . $host . "/$key";
+    echo $scheme . "://" . $host . "/$key" . PHP_EOL;
 }
 
-// Else
+// Invalid request method
 else {
     http_response_code(400);
-    echo "Invalid request method (only GET, PUT and PATCH are allowed).";
+    echo "Invalid request method (only GET, PUT and PATCH are allowed)." . PHP_EOL;
 }
 
 // File cleanup

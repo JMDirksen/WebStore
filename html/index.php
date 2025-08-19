@@ -41,6 +41,12 @@ else {
     // PATCH append to existing file
     elseif ($method === 'PATCH') storedata($key, $data);
 
+    // POST
+    elseif ($method === 'POST') {
+        $append = $_REQUEST['append'] ?? '1';
+        storedata($key, $data, $append);
+    }
+
     // Invalid request method
     else {
         http_response_code(400);
@@ -63,9 +69,9 @@ function storedata($key, $data, $append = true) {
         file_put_contents($file, $data . PHP_EOL, FILE_APPEND);
 
         // Max lines
-        if (isset($_GET['maxlines'])) {
-            $maxlines = (int) $_GET['maxlines'];
-            $headerlines = $_GET['headerlines'] ?? 0;
+        if (isset($_REQUEST['maxlines'])) {
+            $maxlines = (int) $_REQUEST['maxlines'];
+            $headerlines = $_REQUEST['headerlines'] ?? 0;
             $lines = file("/store/$key.txt");
             if (count($lines) - $headerlines > $maxlines) {
                 file_put_contents("/store/$key.txt", implode("", array_merge(

@@ -12,10 +12,7 @@ $path = explode('/', $_GET['path'] ?? "");
 header("Content-Type: text/plain");
 
 // Usage
-if (empty($path[0])) {
-    usage($scheme, $host);
-    exit;
-}
+if (empty($path[0])) usage($scheme, $host);
 
 // GET file
 if ($method === 'GET') {
@@ -30,34 +27,13 @@ if ($method === 'GET') {
     }
 }
 
-// POST (or PUT, PATCH)
+// POST, PUT or PATCH
 else {
     $key = hash('sha256', preg_replace('/[^A-Za-z0-9_\-]/', '-', $path[0] ?? "") . $host);
     $data = file_get_contents('php://input');
 
-    // PUT new file
-    if ($method === 'PUT') storedata($key, $data, false);
-
-    // PATCH append to existing file
-    elseif ($method === 'PATCH') storedata($key, $data);
-
-    // POST
-    elseif ($method === 'POST') {
-        $append = $_REQUEST['append'] ?? '1';
-        storedata($key, $data, $append);
-    }
-
-    // Invalid request method
-    else {
-        http_response_code(400);
-        echo "Invalid request method (only GET, PUT and PATCH are allowed)." . PHP_EOL;
-    }
-}
-
-filecleanup();
-
-function storedata($key, $data, $append = true) {
-    global $scheme, $host;
+    $append = $_REQUEST['append'] ?? true;
+    if ($method === 'PUT') $append = false;
 
     $file = "/store/$key.txt";
     $size = strlen($data);
@@ -80,15 +56,21 @@ function storedata($key, $data, $append = true) {
                 )));
             }
         }
-        echo $scheme . "://" . $host . "/$key";
     }
 
     // New data
     else {
         checksize($size);
         file_put_contents($file, $data . PHP_EOL);
-        echo $scheme . "://" . $host . "/$key";
     }
+
+    echo $scheme . "://" . $host . "/$key";
+    finishup();
+}
+
+function finishup() {
+    filecleanup();
+    exit;
 }
 
 function checksize($size) {
@@ -96,7 +78,7 @@ function checksize($size) {
     if ($size > $maxfilesize) {
         http_response_code(413);
         echo "Content size exceeds limit." . PHP_EOL;
-        exit;
+        finishup();
     }
 }
 
@@ -130,4 +112,5 @@ function usage($scheme, $host) {
     echo "key,value" . PHP_EOL;
     echo "test,value2" . PHP_EOL;
     echo "test,value3" . PHP_EOL;
+    finishup();
 }

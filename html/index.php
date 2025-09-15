@@ -1,7 +1,7 @@
 <?php
 
 // Config
-$maxfilesize = 102400; // 100 KB
+$maxfilesize = 1048576; // 1 MB
 $maxfileage = 2592000; // 30 days
 
 // Init

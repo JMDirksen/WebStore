@@ -6,7 +6,7 @@ $maxfileage = 2592000; // 30 days
 
 // Init
 $method = $_SERVER['REQUEST_METHOD'];
-$scheme = $_SERVER["HTTP_X_FORWARDED_SCHEME"] ?? $_SERVER["REQUEST_SCHEME"];
+$scheme = $_SERVER["HTTP_X_FORWARDED_PROTO"] ?? $_SERVER["REQUEST_SCHEME"];
 $host = $_SERVER["HTTP_HOST"];
 $path = explode('/', $_GET['path'] ?? "");
 header("Content-Type: text/plain");

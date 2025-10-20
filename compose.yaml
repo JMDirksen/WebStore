@@ -1,12 +1,22 @@
 services:
+
   webstore:
     build: .
-    ports:
-      - "8080:80"
     volumes:
       - ./html:/var/www/html
       - store:/store
     restart: unless-stopped
 
+  caddy:
+    image: caddy:latest
+    restart: unless-stopped
+    command: caddy reverse-proxy --from https://my-domain.com:443 --to http://webstore:80
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy:/data
+
 volumes:
   store:
+  caddy:
